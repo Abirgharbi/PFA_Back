@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import Patient from '../models/patient.js';
 import Doctor from '../models/doctor.js';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
+import { sendEmail} from '../utils/SendEmail.js';
 
 
 // Load environment variables from .env file
@@ -55,7 +57,7 @@ export const registerDoctor = async (req, res) => {
   }
 };
 
-// Login for Patient or Doctor
+
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -68,20 +70,53 @@ export const login = async (req, res) => {
       role = 'doctor';
     }
 
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    const code = crypto.randomInt(100000, 999999).toString();
+    user.twoFactorCode = code;
+    user.twoFactorCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    await sendEmail(email, code);
+
+    res.status(200).json({
+      message: 'Verification code sent to your email',
+      need2FA: true,
+      email,
+      role,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+export const verify2FACode = async (req, res) => {
+  const { email, code } = req.body;
+
+  try {
+    let user = await Patient.findOne({ email });
+    let role = 'patient';
+
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      user = await Doctor.findOne({ email });
+      role = 'doctor';
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+    if (!user || user.twoFactorCode !== code || new Date() > user.twoFactorCodeExpires) {
+      return res.status(400).json({ message: 'Invalid or expired verification code' });
     }
 
-    const token = jwt.sign({ id: user._id, role }, JWT_SECRET, { expiresIn: '1d' });
+    user.twoFactorCode = null;
+    user.twoFactorCodeExpires = null;
+    await user.save();
+
+    const token = jwt.sign({ id: user._id, role }, process.env.JWT_SECRET || 'abir', { expiresIn: '1d' });
 
     res.status(200).json({ user, token });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
