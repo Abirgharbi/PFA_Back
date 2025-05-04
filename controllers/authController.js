@@ -77,6 +77,8 @@ export const login = async (req, res) => {
     const code = crypto.randomInt(100000, 999999).toString();
     user.twoFactorCode = code;
     user.twoFactorCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
+    console.log(new Date(), 'current date',  user.twoFactorCodeExpires, 'code expires date');
+
     await user.save();
 
     await sendEmail(email, code);
@@ -104,7 +106,7 @@ export const verify2FACode = async (req, res) => {
       user = await Doctor.findOne({ email });
       role = 'doctor';
     }
-
+    console.log(user, 'user found in verify2FACode',code,user.twoFactorCode, 'code from body', new Date(), 'current date', new Date() > user.twoFactorCodeExpires, 'code expires date');
     if (!user || user.twoFactorCode !== code || new Date() > user.twoFactorCodeExpires) {
       return res.status(400).json({ message: 'Invalid or expired verification code' });
     }
@@ -116,6 +118,40 @@ export const verify2FACode = async (req, res) => {
     const token = jwt.sign({ id: user._id, role }, process.env.JWT_SECRET || 'abir', { expiresIn: '1d' });
 
     res.status(200).json({ user, token });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+export const resend2FA= async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    let user = await Patient.findOne({ email });
+    let role = 'patient';
+
+    if (!user) {
+      user = await Doctor.findOne({ email });
+      role = 'doctor';
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const code = crypto.randomInt(100000, 999999).toString();
+    user.twoFactorCode = code;
+    user.twoFactorCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    await sendEmail(email, code);
+
+    res.status(200).json({
+      message: 'A new verification code has been sent to your email',
+      email,
+      role
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
