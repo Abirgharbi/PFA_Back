@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 
-const patientSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+const PatientSchema = new mongoose.Schema({
+  fullName: String,
+  email: { type: String, unique: true },
+  password: String,
+  twoFactorCode: String,
+  twoFactorCodeExpires: Date,
+  // Referencing multiple doctors (many-to-many relationship)
+  doctors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Doctor' }],
 });
 
-const Patient = mongoose.model('Patient', patientSchema);
+const Patient = mongoose.model('Patient', PatientSchema);
 export default Patient;
