@@ -77,7 +77,6 @@ export const login = async (req, res) => {
     const code = crypto.randomInt(100000, 999999).toString();
     user.twoFactorCode = code;
     user.twoFactorCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
-    console.log(new Date(), 'current date',  user.twoFactorCodeExpires, 'code expires date');
 
     await user.save();
 
@@ -106,7 +105,6 @@ export const verify2FACode = async (req, res) => {
       user = await Doctor.findOne({ email });
       role = 'doctor';
     }
-    console.log(user, 'user found in verify2FACode',code,user.twoFactorCode, 'code from body', new Date(), 'current date', new Date() > user.twoFactorCodeExpires, 'code expires date');
     if (!user || user.twoFactorCode !== code || new Date() > user.twoFactorCodeExpires) {
       return res.status(400).json({ message: 'Invalid or expired verification code' });
     }
@@ -115,7 +113,7 @@ export const verify2FACode = async (req, res) => {
     user.twoFactorCodeExpires = null;
     await user.save();
 
-    const token = jwt.sign({ id: user._id, role }, process.env.JWT_SECRET || 'abir', { expiresIn: '1d' });
+    const token = jwt.sign({ id: user._id, role }, process.env.JWT_SECRET , { expiresIn: '1d' });
 
     res.status(200).json({ user, token });
   } catch (err) {
