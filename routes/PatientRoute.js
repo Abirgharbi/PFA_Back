@@ -35,6 +35,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+
+
 // Update patient
 router.put('/:id', async (req, res) => {
   try {
