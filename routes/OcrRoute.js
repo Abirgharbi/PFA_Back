@@ -29,7 +29,7 @@ router.post("/", verifyToken, upload.single("image"), async (req, res) => {
     // Enregistre le rapport dans MongoDB
     const rapport = new Rapport({
       patientId: req.user.id,
-      imageUrl: req.file.path, // ou utiliser un chemin public si tu héberges les images
+      imageUrl: req.file.path.replace(/\\/g, '/'), // Force les slashs Unix // ou utiliser un chemin public si tu héberges les images
       ocrResult,
     });
 

@@ -8,6 +8,12 @@ import reportRoutes from './routes/ReportRoute.js';
 import report from './routes/report.js'
 import dotenv from 'dotenv'; // Import dotenv for environment variables
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Créez l'équivalent de __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -16,14 +22,21 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:8080', // Spécifiez explicitement l'origine frontend
+  credentials: true, // Autorisez les credentials
+  optionsSuccessStatus: 200 // Pour les navigateurs anciens
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 // Routes
+
 
 app.use('/api', report);
 app.use('/api/auth', authRoutes);
 app.use('/api/ocr', ocrRoutes);
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/patients', patientRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/uploads', reportRoutes);
