@@ -20,24 +20,34 @@ const upload = multer({ storage });
 router.post("/", verifyToken, upload.single("image"), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, message: "Aucun fichier envoyé." });
+      return res
+        .status(400)
+        .json({ success: false, message: "Aucun fichier envoyé." });
     }
-
     const imagePath = path.resolve(req.file.path);
     const ocrResult = await envoyerImageAuServiceOCR(imagePath);
-
-    // Enregistre le rapport dans MongoDB
     const rapport = new Rapport({
       patientId: req.user.id,
-      imageUrl: req.file.path, // ou utiliser un chemin public si tu héberges les images
+      imageUrl: req.file.path,
       ocrResult,
+      date: ocrResult.Edite_date || new Date(),
+      reportType: req.body.reportType, // ✅ Add this line
     });
 
-    await rapport.save();
-
-    res.json({ success: true, message: "Rapport enregistré avec succès", data: rapport });
+    const rapporti = await rapport.save();
+    res.json({
+      success: true,
+      message: "Rapport enregistré avec succès",
+      data: rapporti,
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Erreur lors du traitement OCR", error: err.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Erreur lors du traitement OCR",
+        error: err.message,
+      });
   }
 });
 

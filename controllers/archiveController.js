@@ -1,4 +1,4 @@
-import Report from '../models/Rapport.js';
+import Report from "../models/Rapport.js";
 
 export const getReportsByUser = async (req, res) => {
   try {
@@ -6,7 +6,7 @@ export const getReportsByUser = async (req, res) => {
     const reports = await Report.find({ patientId: userId }).sort({ date: -1 });
     res.json(reports);
   } catch (err) {
-    console.error('Erreur récupération rapports :', err);
-    res.status(500).json({ message: 'Erreur serveur' });
+    console.error("Erreur récupération rapports :", err);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 };

@@ -1,10 +1,10 @@
-import express from 'express';
-import Doctor from '../models/doctor.js';
+import express from "express";
+import Doctor from "../models/doctor.js";
 
 const router = express.Router();
 
 // Create doctor
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const doctor = new Doctor(req.body);
     await doctor.save();
@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
 });
 
 // Get all doctors
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const doctors = await Doctor.find();
     res.json(doctors);
@@ -25,10 +25,10 @@ router.get('/', async (req, res) => {
 });
 
 // Get doctor by ID
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const doctor = await Doctor.findById(req.params.id);
-    if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
+    if (!doctor) return res.status(404).json({ message: "Doctor not found" });
     res.json(doctor);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -36,10 +36,12 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update doctor
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
-    const doctor = await Doctor.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
+    const doctor = await Doctor.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!doctor) return res.status(404).json({ message: "Doctor not found" });
     res.json(doctor);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -47,11 +49,11 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete doctor
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const doctor = await Doctor.findByIdAndDelete(req.params.id);
-    if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
-    res.json({ message: 'Doctor deleted' });
+    if (!doctor) return res.status(404).json({ message: "Doctor not found" });
+    res.json({ message: "Doctor deleted" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

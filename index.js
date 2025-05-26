@@ -1,13 +1,10 @@
 import express from 'express';
-import mongoose from 'mongoose';
-import patientRoutes from './routes/PatientRoute.js';
-import doctorRoutes from './routes/DoctorRoute.js';
-import authRoutes from './routes/AuthRoute.js';
-import ocrRoutes from './routes/OcrRoute.js';
-import reportRoutes from './routes/ReportRoute.js';
-import report from './routes/report.js'
+import routes from './routes/index.js'; // Import all routes from index.js
 import dotenv from 'dotenv'; // Import dotenv for environment variables
 import cors from 'cors';
+import { connectDB } from './config/db.js';
+import { errorHandler } from './Middleware/errorHandler.js';
+
 
 dotenv.config();
 
@@ -20,18 +17,14 @@ app.use(cors());
 app.use(express.json());
 // Routes
 
-app.use('/api', report);
-app.use('/api/auth', authRoutes);
-app.use('/api/ocr', ocrRoutes);
+
 app.use('/uploads', express.static('uploads'));
-app.use('/api/patients', patientRoutes);
-app.use('/api/doctors', doctorRoutes);
-app.use('/api/uploads', reportRoutes);
+app.use('/api', routes);
+
+app.use(errorHandler);
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('MongoDB connected');
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch(err => console.error(err));
+(async () => {
+  await connectDB(process.env.MONGO_URI);
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+})();
