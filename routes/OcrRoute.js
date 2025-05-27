@@ -1,7 +1,5 @@
-// routes/ocr.js
 import express from "express";
 import multer from "multer";
-import fs from "fs";
 import path from "path";
 import Rapport from "../models/Rapport.js";
 import { envoyerImageAuServiceOCR } from "../controllers/ocrController.js";
@@ -16,28 +14,43 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+function convertDate(dateStr) {
+  // Gère le format "DD/MM/YYYY"
+  const [day, month, year] = dateStr.split("/");
+  if (!day || !month || !year) return null;
+  return new Date(`${year}-${month}-${day}`);
+}
 
 router.post("/", verifyToken, upload.single("image"), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, message: "Aucun fichier envoyé." });
+      return res
+        .status(400)
+        .json({ success: false, message: "Aucun fichier envoyé." });
     }
-
     const imagePath = path.resolve(req.file.path);
     const ocrResult = await envoyerImageAuServiceOCR(imagePath);
-
-    // Enregistre le rapport dans MongoDB
     const rapport = new Rapport({
       patientId: req.user.id,
       imageUrl: req.file.path.replace(/\\/g, '/'), // Force les slashs Unix // ou utiliser un chemin public si tu héberges les images
       ocrResult,
+      date: convertDate(ocrResult.Edite_date) || new Date(),
+      reportType: req.body.reportType,
     });
 
     await rapport.save();
-
-    res.json({ success: true, message: "Rapport enregistré avec succès", data: rapport });
+    console.log("Rapport enregistré :", rapport);
+    res.json({
+      success: true,
+      message: "Rapport enregistré avec succès",
+      data: rapport,
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Erreur lors du traitement OCR", error: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors du traitement OCR",
+      error: err.message,
+    });
   }
 });
 
