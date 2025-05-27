@@ -1,158 +1,78 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import Patient from '../models/patient.js';
-import Doctor from '../models/doctor.js';
-import dotenv from 'dotenv';
-import crypto from 'crypto';
-import { sendEmail} from '../utils/SendEmail.js';
+import AuthService from "../services/authService.js";
 
-
-// Load environment variables from .env file
-dotenv.config();
-const JWT_SECRET = process.env.JWT_SECRET || 'abir';
-
-// Register Patient
 export const registerPatient = async (req, res) => {
-  const { fullName, email, password } = req.body;
-  
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const existingPatient = await Patient.findOne({ email });
-    if (existingPatient) {
-      return res.status(400).json({ message: 'Patient already exists' });
-    }
-
-    const patient = new Patient({ fullName, email, password: hashedPassword });
-    await patient.save();
-
-    const token = jwt.sign({ id: patient._id, role: 'patient' }, JWT_SECRET, { expiresIn: '1d' });
-
-    res.status(201).json({ user: patient, token });
+    const { fullName, email, password } = req.body;
+    const { user, token } = await AuthService.registerUser({
+      fullName,
+      email,
+      password,
+      role: "patient",
+    });
+    res.status(201).json({ user, token });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
-// Register Doctor
 export const registerDoctor = async (req, res) => {
-  const { fullName, email, password } = req.body;
-  
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const existingDoctor = await Doctor.findOne({ email });
-    if (existingDoctor) {
-      return res.status(400).json({ message: 'Doctor already exists' });
-    }
-
-    const doctor = new Doctor({ fullName, email, password: hashedPassword });
-    await doctor.save();
-
-    const token = jwt.sign({ id: doctor._id, role: 'doctor' }, JWT_SECRET, { expiresIn: '1d' });
-
-    res.status(201).json({ user: doctor, token });
+    const { fullName, email, password } = req.body;
+    const { user, token } = await AuthService.registerUser({
+      fullName,
+      email,
+      password,
+      role: "doctor",
+    });
+    res.status(201).json({ user, token });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
-
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
-
   try {
-    let user = await Patient.findOne({ email });
-    let role = 'patient';
-
-    if (!user) {
-      user = await Doctor.findOne({ email });
-      role = 'doctor';
-    }
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
-
-    const code = crypto.randomInt(100000, 999999).toString();
-    user.twoFactorCode = code;
-    user.twoFactorCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
-    console.log(new Date(), 'current date',  user.twoFactorCodeExpires, 'code expires date');
-
-    await user.save();
-
-    await sendEmail(email, code);
-
-    res.status(200).json({
-      message: 'Verification code sent to your email',
-      need2FA: true,
+    const { email, password } = req.body;
+    const { email: userEmail, role } = await AuthService.loginUser({
       email,
+      password,
+    });
+    res.status(200).json({
+      message: "Verification code sent to your email",
+      need2FA: true,
+      email: userEmail,
       role,
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
-
 
 export const verify2FACode = async (req, res) => {
-  const { email, code } = req.body;
-
   try {
-    let user = await Patient.findOne({ email });
-    let role = 'patient';
-
-    if (!user) {
-      user = await Doctor.findOne({ email });
-      role = 'doctor';
-    }
-    console.log(user, 'user found in verify2FACode',code,user.twoFactorCode, 'code from body', new Date(), 'current date', new Date() > user.twoFactorCodeExpires, 'code expires date');
-    if (!user || user.twoFactorCode !== code || new Date() > user.twoFactorCodeExpires) {
-      return res.status(400).json({ message: 'Invalid or expired verification code' });
-    }
-
-    user.twoFactorCode = null;
-    user.twoFactorCodeExpires = null;
-    await user.save();
-
-    const token = jwt.sign({ id: user._id, role }, process.env.JWT_SECRET || 'abir', { expiresIn: '1d' });
-
-    res.status(200).json({ user, token });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const { email, code } = req.body;
+    const { user, token, role } = await AuthService.verify2FACode({
+      email,
+      code,
+    });
+    res.status(200).json({ user, token, role });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
 
-
-export const resend2FA= async (req, res) => {
-  const { email } = req.body;
-
+export const resend2FA = async (req, res) => {
   try {
-    let user = await Patient.findOne({ email });
-    let role = 'patient';
-
-    if (!user) {
-      user = await Doctor.findOne({ email });
-      role = 'doctor';
-    }
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    const code = crypto.randomInt(100000, 999999).toString();
-    user.twoFactorCode = code;
-    user.twoFactorCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
-    await user.save();
-
-    await sendEmail(email, code);
-
-    res.status(200).json({
-      message: 'A new verification code has been sent to your email',
+    const { email } = req.body;
+    const { email: userEmail, role } = await AuthService.resend2FACode({
       email,
-      role
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(200).json({
+      message: "A new verification code has been sent to your email",
+      email: userEmail,
+      role,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
