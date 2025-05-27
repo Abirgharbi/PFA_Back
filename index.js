@@ -5,19 +5,32 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import { errorHandler } from "./Middleware/errorHandler.js";
 
+// Créez l'équivalent de __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+
+const corsOptions = {
+  origin: 'http://localhost:8080', // Spécifiez explicitement l'origine frontend
+  credentials: true, // Autorisez les credentials
+  optionsSuccessStatus: 200 // Pour les navigateurs anciens
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
+
 // Routes
 
 app.use("/uploads", express.static("uploads"));
 app.use("/api", routes);
 
 app.use(errorHandler);
+
 
 // Connect to MongoDB
 (async () => {

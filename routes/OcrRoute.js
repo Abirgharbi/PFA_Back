@@ -32,7 +32,7 @@ router.post("/", verifyToken, upload.single("image"), async (req, res) => {
     const ocrResult = await envoyerImageAuServiceOCR(imagePath);
     const rapport = new Rapport({
       patientId: req.user.id,
-      imageUrl: req.file.path,
+      imageUrl: req.file.path.replace(/\\/g, '/'), // Force les slashs Unix // ou utiliser un chemin public si tu héberges les images
       ocrResult,
       date: convertDate(ocrResult.Edite_date) || new Date(),
       reportType: req.body.reportType,
