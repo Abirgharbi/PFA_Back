@@ -1,7 +1,5 @@
-// routes/ocr.js
 import express from "express";
 import multer from "multer";
-import fs from "fs";
 import path from "path";
 import Rapport from "../models/Rapport.js";
 import { envoyerImageAuServiceOCR } from "../controllers/ocrController.js";
@@ -16,6 +14,12 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+function convertDate(dateStr) {
+  // Gère le format "DD/MM/YYYY"
+  const [day, month, year] = dateStr.split("/");
+  if (!day || !month || !year) return null;
+  return new Date(`${year}-${month}-${day}`);
+}
 
 router.post("/", verifyToken, upload.single("image"), async (req, res) => {
   try {
@@ -30,24 +34,23 @@ router.post("/", verifyToken, upload.single("image"), async (req, res) => {
       patientId: req.user.id,
       imageUrl: req.file.path,
       ocrResult,
-      date: ocrResult.Edite_date || new Date(),
-      reportType: req.body.reportType, // ✅ Add this line
+      date: convertDate(ocrResult.Edite_date) || new Date(),
+      reportType: req.body.reportType,
     });
 
-    const rapporti = await rapport.save();
+    await rapport.save();
+    console.log("Rapport enregistré :", rapport);
     res.json({
       success: true,
       message: "Rapport enregistré avec succès",
-      data: rapporti,
+      data: rapport,
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Erreur lors du traitement OCR",
-        error: err.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors du traitement OCR",
+      error: err.message,
+    });
   }
 });
 

@@ -47,7 +47,6 @@ class AuthService {
     user.twoFactorCode = code;
     user.twoFactorCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
-
     await sendEmail(email, code);
 
     return { email, role };
