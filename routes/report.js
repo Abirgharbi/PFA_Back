@@ -28,7 +28,6 @@ router.get("/shared-reports/:id", async (req, res) => {
     }).populate("patientId", "fullName"); // Only populate name (and _id by default)
 
     if (!report) {
-      console.log("Tentative d'accès non autorisée au rapport:", req.params.id);
       return res.status(404).json({
         success: false,
         message: "Rapport non trouvé ou accès non autorisé",

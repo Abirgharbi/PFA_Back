@@ -1,4 +1,4 @@
-import {getReportStatsDetailed } from "../Services/reportService.js";
+import { getReportStatsDetailed } from "../Services/reportService.js";
 import Rapport from "../models/Rapport.js";
 import Doctor from "../models/doctor.js";
 
@@ -10,16 +10,16 @@ export const getReportsAnalytics = async (req, res) => {
     if (!patientId) {
       return res.status(400).json({ message: "Patient ID requis" });
     }
-  
+
     // Vérifie que ce patient est bien lié au docteur (optionnel pour sécurité)
     const doctor = await Doctor.findById(doctorId);
-    console.log(doctor);
     if (!doctor || !doctor.patients.includes(patientId)) {
-      return res.status(403).json({ message: "Accès non autorisé à ce patient" });
+      return res
+        .status(403)
+        .json({ message: "Accès non autorisé à ce patient" });
     }
     // Récupère les rapports de ce patient
     const reports = await Rapport.find({ patientId });
-    console.log(reports)
     const stats = getReportStatsDetailed(reports);
     res.json(stats);
   } catch (err) {

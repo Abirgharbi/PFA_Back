@@ -1,26 +1,27 @@
-import Notification from "../models/Notification.js";
+import {
+  fetchUserNotifications,
+  markNotificationAsRead,
+  createNotification,
+  createFollowUpNotification,
+} from "../services/notificationService.js";
 
-// GET notifications for a user
+// GET /api/notifications/user
 export const getUserNotifications = async (req, res) => {
-  const  userId  = req.user.id;
+  const userId = req.user?.id;
   if (!userId) {
     return res.status(400).json({ message: "User ID is required." });
   }
 
   try {
-    const notifications = await Notification.find({ userId }).sort({
-      createdAt: -1,
-    });
+    const notifications = await fetchUserNotifications(userId);
     res.json(notifications);
   } catch (err) {
     console.error("Error fetching notifications:", err);
-    res
-      .status(500)
-      .json({ message: "Server error while fetching notifications." });
+    res.status(500).json({ message: "Server error while fetching notifications." });
   }
 };
 
-// MARK a notification as read
+// PUT /api/notifications/read/:id
 export const markAsRead = async (req, res) => {
   const { id } = req.params;
 
@@ -29,12 +30,7 @@ export const markAsRead = async (req, res) => {
   }
 
   try {
-    const notification = await Notification.findByIdAndUpdate(
-      id,
-      { read: true, updatedAt: new Date() },
-      { new: true }
-    );
-
+    const notification = await markNotificationAsRead(id);
     if (!notification) {
       return res.status(404).json({ message: "Notification not found." });
     }
@@ -42,20 +38,19 @@ export const markAsRead = async (req, res) => {
     res.json(notification);
   } catch (err) {
     console.error("Error marking notification as read:", err);
-    res
-      .status(500)
-      .json({ message: "Server error while updating notification." });
+    res.status(500).json({ message: "Server error while updating notification." });
   }
 };
 
-// CREATE a new notification (used internally or by event)
-export const createNotification = async (data) => {
+// POST /api/notifications/followups
+export const createFollowUp = async (req, res) => {
+  const { patientId, followUpDate, details } = req.body;
+
   try {
-    const notification = new Notification(data);
-    await notification.save();
-    return notification;
-  } catch (err) {
-    console.error("Error creating notification:", err);
-    throw new Error("Failed to create notification.");
+    const followUp = await createFollowUpNotification({ patientId, followUpDate, details });
+    res.status(201).json({ success: true, followUp });
+  } catch (error) {
+    console.error("Follow-up creation failed:", error);
+    res.status(500).json({ message: "Error creating follow-up", error });
   }
 };

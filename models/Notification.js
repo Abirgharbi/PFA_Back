@@ -7,8 +7,10 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ["info", "warning", "success", "error"],
+    enum: ["info", "warning", "success", "error", "follow-up", "reportShared"],
+    default: "info",
   },
+  datefollowup: { type: Date, default: null },
   read: { type: Boolean, default: false },
   reportId: { type: mongoose.Schema.Types.ObjectId, ref: "Report" },
   createdAt: { type: Date, default: Date.now },
