@@ -3,6 +3,7 @@ import express from 'express';
 import { shareReport , getSharedReport ,shareByEmail,acceptSharedReport} from '../controllers/archiveController.js'
 import Report from '../models/Rapport.js'
 import verifyToken from "../Middleware/AuthVerify.js";
+import { shareRapportWithDoctor } from '../controllers/reportController.js';
 
 const router = express.Router();
 
@@ -70,5 +71,7 @@ router.get('/reports/patient/:patientId', verifyToken, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+router.post("/share", shareRapportWithDoctor);
 
 export default router;

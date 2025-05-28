@@ -2,18 +2,17 @@ import Report from "../models/Rapport.js";
 
 export const getUserReports = async (userId) => {
   const reports = await Report.find({ patientId: userId }).sort({ date: -1 });
+
   return reports;
 };
 
 export const getReportStatsDetailed = (reports) => {
   const totalrapport = reports.length;
-
   // Pour rapports : nombre de rapports par date
   const rapportsMap = {};
 
   // Pour resulte : tableau des { champ, valeur, date } extraits de OCR
   const resulte = [];
-
   reports.forEach((report) => {
     const date = report.ocrResult?.Edite_date || "Inconnu";
 
