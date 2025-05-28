@@ -13,12 +13,13 @@ export const getReportsAnalytics = async (req, res) => {
 
     // Vérifie que ce patient est bien lié au docteur (optionnel pour sécurité)
     const doctor = await Doctor.findById(doctorId);
+    console.log(doctor);
     if (!doctor || !doctor.patients.includes(patientId)) {
       return res.status(403).json({ message: "Accès non autorisé à ce patient" });
     }
-
     // Récupère les rapports de ce patient
     const reports = await Rapport.find({ patientId });
+    console.log(reports)
     const stats = getReportStatsDetailed(reports);
     res.json(stats);
   } catch (err) {

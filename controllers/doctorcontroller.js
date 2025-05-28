@@ -1,5 +1,6 @@
 import * as doctorService from "../services/doctoService.js";
 import { getDoctorWithPatients } from "../services/doctoService.js";
+import { unlinkDoctorAndPatient } from "../services/doctoService.js";
 
 export const createDoctor = async (req, res) => {
   try {
@@ -46,6 +47,26 @@ export const deleteDoctor = async (req, res) => {
     res.json({ message: "Doctor deleted" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+// controllers/patientController.js
+
+export const deletePatientFromDoctor = async (req, res) => {
+  const { patientId } = req.params;
+  const doctorId = req.user.id; // or req.user._id depending on your auth middleware
+
+  try {
+    const message = await unlinkDoctorAndPatient(doctorId, patientId);
+    res.json({ message });
+  } catch (error) {
+    console.error("Error deleting patient:", error);
+    if (
+      error.message === "Doctor not found" ||
+      error.message === "Patient not found"
+    ) {
+      return res.status(404).json({ message: error.message });
+    }
+    res.status(500).json({ message: "Server error" });
   }
 };
 

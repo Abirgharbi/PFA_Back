@@ -1,5 +1,5 @@
 import Doctor from "../models/doctor.js";
-
+import Patient from '../models/patient.js';
 export const createDoctor = async (data) => {
   const doctor = new Doctor(data);
   return await doctor.save();
@@ -30,3 +30,28 @@ export const getDoctorWithPatients = async (doctorId) => {
 
   return doctor.patients;
 };
+// services/patientService.js
+
+
+
+
+
+export const unlinkDoctorAndPatient = async (doctorId, patientId) => {
+  // Find doctor and patient
+  const doctor = await Doctor.findById(doctorId);
+  if (!doctor) throw new Error('Doctor not found');
+
+  const patient = await Patient.findById(patientId);
+  if (!patient) throw new Error('Patient not found');
+
+  // Remove patientId from doctor's patients array
+  doctor.patients = doctor.patients.filter(id => id.toString() !== patientId);
+  await doctor.save();
+
+  // Remove doctorId from patient's doctors array
+  patient.doctors = patient.doctors.filter(id => id.toString() !== doctorId);
+  await patient.save();
+
+  return 'Doctor and Patient unlinked successfully';
+};
+

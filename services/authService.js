@@ -46,10 +46,10 @@ class AuthService {
     const code = crypto.randomInt(100000, 999999).toString();
     user.twoFactorCode = code;
     user.twoFactorCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
-    await user.save();
+    const anybody = await user.save();
     await sendEmail(email, code);
 
-    return { email, role };
+    return { email, role, userId: anybody._id };
   }
 
   static async verify2FACode({ email, code }) {

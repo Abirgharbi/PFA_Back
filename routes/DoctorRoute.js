@@ -6,8 +6,10 @@ const router = express.Router();
 router.post("/", doctorController.createDoctor);
 router.get("/", doctorController.getAllDoctors);
 router.get("/my-patients", authenticateDoctor, doctorController.getMyPatients);
+router.delete("/patients/:patientId", authenticateDoctor, doctorController.deletePatientFromDoctor);
 router.get("/:id", doctorController.getDoctorById);
 router.put("/:id", doctorController.updateDoctor);
 router.delete("/:id", doctorController.deleteDoctor);
+
 
 export default router;

@@ -6,6 +6,7 @@ import Doctor from "../models/doctor.js";
 dotenv.config();
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
+
   if (!authHeader) {
     return res.status(401).json({ success: false, message: "Token manquant" });
   }

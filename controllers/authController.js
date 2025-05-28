@@ -1,4 +1,5 @@
 import AuthService from "../services/authService.js";
+import { createNotification } from "../utils/Notificaitons.js";
 
 export const registerPatient = async (req, res) => {
   try {
@@ -33,9 +34,15 @@ export const registerDoctor = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const { email: userEmail, role } = await AuthService.loginUser({
+    const { email: userEmail, role, userId } = await AuthService.loginUser({
       email,
       password,
+    });
+    await createNotification({
+      userId: userId,
+      title: "You Has been logged in",
+      message: "your account s looged ind",
+      type: "info",
     });
     res.status(200).json({
       message: "Verification code sent to your email",
