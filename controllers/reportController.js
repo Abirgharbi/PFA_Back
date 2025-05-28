@@ -10,7 +10,7 @@ export const getReportsAnalytics = async (req, res) => {
     if (!patientId) {
       return res.status(400).json({ message: "Patient ID requis" });
     }
-
+  
     // Vérifie que ce patient est bien lié au docteur (optionnel pour sécurité)
     const doctor = await Doctor.findById(doctorId);
     console.log(doctor);

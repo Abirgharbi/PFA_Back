@@ -72,8 +72,10 @@ export const deletePatientFromDoctor = async (req, res) => {
 
 export const getMyPatients = async (req, res) => {
   try {
+
     const doctorId = req.user.id; // set by auth middleware
     const patients = await getDoctorWithPatients(doctorId);
+
     res.status(200).json(patients);
   } catch (error) {
     console.error("Error getting patients:", error);
