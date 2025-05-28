@@ -14,7 +14,6 @@ router.get("/reports", verifyToken, getReportsByUser);
 
 router.get("/:id", getReportById);
 
-// routes/rapport.js or similar
 router.patch("/:id/visibility", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
