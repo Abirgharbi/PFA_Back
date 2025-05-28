@@ -1,13 +1,14 @@
 import express from "express";
-import * as doctorController from "../controllers/doctorcontroller.js";
-import { authenticateDoctor } from "../Middleware/AuthVerify.js";
+
+import verifyToken from "../Middleware/AuthVerify.js";
+import { createDoctor, deleteDoctor, getAllDoctors, getDoctorById, getMyPatients, updateDoctor } from "../controllers/doctorcontroller.js";
 const router = express.Router();
 
-router.post("/", doctorController.createDoctor);
-router.get("/", doctorController.getAllDoctors);
-router.get("/my-patients", authenticateDoctor, doctorController.getMyPatients);
-router.get("/:id", doctorController.getDoctorById);
-router.put("/:id", doctorController.updateDoctor);
-router.delete("/:id", doctorController.deleteDoctor);
+router.post("/", createDoctor);
+router.get("/", getAllDoctors);
+router.get("/my-patients", verifyToken, getMyPatients);
+router.get("/:id", getDoctorById);
+router.put("/:id", updateDoctor);
+router.delete("/:id", deleteDoctor);
 
 export default router;
