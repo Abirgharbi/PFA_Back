@@ -1,21 +1,33 @@
-import {
-  getUserReports,
-  getReportStatsDetailed,
-} from "../Services/reportService.js";
+import {getReportStatsDetailed } from "../Services/reportService.js";
 import Rapport from "../models/Rapport.js";
 import Doctor from "../models/doctor.js";
+
 export const getReportsAnalytics = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const reports = await getUserReports(userId);
+    const doctorId = req.user.id;
+    const { patientId } = req.params;
+
+    if (!patientId) {
+      return res.status(400).json({ message: "Patient ID requis" });
+    }
+
+    // Vérifie que ce patient est bien lié au docteur (optionnel pour sécurité)
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor || !doctor.patients.includes(patientId)) {
+      return res.status(403).json({ message: "Accès non autorisé à ce patient" });
+    }
+
+    // Récupère les rapports de ce patient
+    const reports = await Rapport.find({ patientId });
     const stats = getReportStatsDetailed(reports);
-    console.log(stats)
+
     res.json(stats);
   } catch (err) {
-    console.error("Erreur statistiques rapport :", err);
+    console.error("Erreur statistiques patient :", err);
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
+
 export const shareRapportWithDoctor = async (req, res) => {
   try {
     const { rapportId, doctorId } = req.body;

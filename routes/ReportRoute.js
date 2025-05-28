@@ -8,7 +8,7 @@ import { getReportsAnalytics } from "../controllers/reportController.js";
 import Rapport from "../models/Rapport.js";
 
 const router = express.Router();
-router.get("/analytics", verifyToken, getReportsAnalytics);
+router.get("/analytics/:patientId", verifyToken, getReportsAnalytics);
 
 router.get("/reports", verifyToken, getReportsByUser);
 

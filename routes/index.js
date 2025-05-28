@@ -1,5 +1,5 @@
 import express from "express";
-import patientRoutes from "./Patientroute.js";
+import patientRoutes from "./PatientRoute.js";
 import doctorRoutes from "./DoctorRoute.js";
 import authRoutes from "./authRoute.js";
 import ocrRoutes from "./OcrRoute.js";
