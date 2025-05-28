@@ -8,13 +8,13 @@ import { getReportsAnalytics } from "../controllers/reportController.js";
 import Rapport from "../models/Rapport.js";
 
 const router = express.Router();
+
 router.get("/analytics", verifyToken, getReportsAnalytics);
 
 router.get("/reports", verifyToken, getReportsByUser);
 
 router.get("/:id", getReportById);
 
-// routes/rapport.js or similar
 router.patch("/:id/visibility", verifyToken, async (req, res) => {
   try {
     const { id } = req.params;

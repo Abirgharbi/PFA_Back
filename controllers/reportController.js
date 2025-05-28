@@ -9,7 +9,7 @@ export const getReportsAnalytics = async (req, res) => {
     const userId = req.user.id;
     const reports = await getUserReports(userId);
     const stats = getReportStatsDetailed(reports);
-    console.log(stats)
+    console.log(stats);
     res.json(stats);
   } catch (err) {
     console.error("Erreur statistiques rapport :", err);
@@ -18,7 +18,8 @@ export const getReportsAnalytics = async (req, res) => {
 };
 export const shareRapportWithDoctor = async (req, res) => {
   try {
-    const { rapportId, doctorId } = req.body;
+    const rapportId = req.params.id;
+    const doctorId = req.user.id;
 
     const rapport = await Rapport.findById(rapportId);
     const doctor = await Doctor.findById(doctorId);
@@ -39,12 +40,10 @@ export const shareRapportWithDoctor = async (req, res) => {
       await doctor.save();
     }
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Rapport shared with doctor successfully.",
-      });
+    res.status(200).json({
+      success: true,
+      message: "Rapport shared with doctor successfully.",
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal server error" });
