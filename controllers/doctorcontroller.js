@@ -72,7 +72,6 @@ export const deletePatientFromDoctor = async (req, res) => {
 
 export const getMyPatients = async (req, res) => {
   try {
-
     const doctorId = req.user.id; // set by auth middleware
     const patients = await getDoctorWithPatients(doctorId);
 
@@ -80,5 +79,20 @@ export const getMyPatients = async (req, res) => {
   } catch (error) {
     console.error("Error getting patients:", error);
     res.status(500).json({ message: error.message || "Server error" });
+  }
+};
+export const sendinvitationToPatient = async (req, res) => {
+  try {
+    const { patientemail, url } = req.body;
+    const doctorID = req.user.id;
+    const resultMessage = await doctorService.sendinvitationToPatientservice(
+      doctorID,
+      patientemail,
+      url
+    );
+    return res.status(200).json({ message: resultMessage });
+  } catch (error) {
+    console.error("Error sending invitation:", error);
+    return res.status(500).json({ message: "Failed to send invitation" });
   }
 };

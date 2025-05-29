@@ -75,7 +75,7 @@ class AuthService {
       expiresIn: "1d",
     });
 
-    return { user, token, role };
+    return { user, token, role, id: user._id };
   }
 
   static async resend2FACode({ email }) {

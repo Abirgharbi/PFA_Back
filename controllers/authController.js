@@ -34,7 +34,11 @@ export const registerDoctor = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const { email: userEmail, role, userId } = await AuthService.loginUser({
+    const {
+      email: userEmail,
+      role,
+      userId,
+    } = await AuthService.loginUser({
       email,
       password,
     });
@@ -58,11 +62,11 @@ export const login = async (req, res) => {
 export const verify2FACode = async (req, res) => {
   try {
     const { email, code } = req.body;
-    const { user, token, role } = await AuthService.verify2FACode({
+    const { user, token, role, id } = await AuthService.verify2FACode({
       email,
       code,
     });
-    res.status(200).json({ user, token, role });
+    res.status(200).json({ user, token, role, id });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

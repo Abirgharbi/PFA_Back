@@ -4,6 +4,8 @@ import {
   getPatientByIdService,
   updatePatientService,
   deletePatientService,
+  addPatientToDoctorService,
+  getmydoctos
 } from "../services/patientService.js";
 
 // Create a new patient
@@ -58,3 +60,35 @@ export const deletePatient = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const addPatientToDoctor = async (req, res) => {
+  try {
+    const { idoctor } = req.params;
+    const patientID = req.user.id;
+
+    const result = await addPatientToDoctorService(idoctor, patientID);
+
+    if (result.alreadyConnected) {
+      return res.status(200).json({ message: "You are already connected!" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Patient added and email sent successfully!" });
+  } catch (error) {
+    console.error("Error adding patient:", error.message);
+    res.status(500).json({ error: "Failed to add patient." });
+  }
+};
+export const getMydoctors = async (req, res) => {
+  try {
+    const patientId = req.user.id; // Assuming the patient ID is stored in req.user.id
+    const doctors = await getmydoctos(patientId); // Adjust this to fetch doctors for the patient
+
+    if (!doctors) return res.status(404).json({ message: "No doctors found" });
+    res.json(doctors);
+  } catch (error) {
+    console.error("Error fetching doctors:", error);
+    res.status(500).json({ error: error.message });
+  }
+}

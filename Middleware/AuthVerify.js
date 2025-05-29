@@ -6,12 +6,9 @@ import Doctor from "../models/doctor.js";
 dotenv.config();
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
-
   if (!authHeader) {
-    
     return res.status(401).json({ success: false, message: "Token manquant" });
   }
-
 
   const token = authHeader.split(" ")[1]; // Supprime le mot "Bearer"
   try {
@@ -24,7 +21,8 @@ const verifyToken = (req, res, next) => {
 };
 
 export const authenticateDoctor = async (req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
+  const authHeader = req.headers["authorization"];
+  const token = authHeader.split(" ")[1]; // Supprime le mot "Bearer"
   if (!token) return res.status(401).json({ message: "Access denied" });
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

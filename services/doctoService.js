@@ -1,5 +1,6 @@
 import Doctor from "../models/doctor.js";
-import Patient from '../models/patient.js';
+import Patient from "../models/patient.js";
+import { sendEmailadding } from "../utils/SendEmail.js";
 export const createDoctor = async (data) => {
   const doctor = new Doctor(data);
   return await doctor.save();
@@ -32,26 +33,44 @@ export const getDoctorWithPatients = async (doctorId) => {
 };
 // services/patientService.js
 
-
-
-
-
 export const unlinkDoctorAndPatient = async (doctorId, patientId) => {
   // Find doctor and patient
   const doctor = await Doctor.findById(doctorId);
-  if (!doctor) throw new Error('Doctor not found');
+  if (!doctor) throw new Error("Doctor not found");
 
   const patient = await Patient.findById(patientId);
-  if (!patient) throw new Error('Patient not found');
+  if (!patient) throw new Error("Patient not found");
 
   // Remove patientId from doctor's patients array
-  doctor.patients = doctor.patients.filter(id => id.toString() !== patientId);
+  doctor.patients = doctor.patients.filter((id) => id.toString() !== patientId);
   await doctor.save();
 
   // Remove doctorId from patient's doctors array
-  patient.doctors = patient.doctors.filter(id => id.toString() !== doctorId);
+  patient.doctors = patient.doctors.filter((id) => id.toString() !== doctorId);
   await patient.save();
 
-  return 'Doctor and Patient unlinked successfully';
+  return "Doctor and Patient unlinked successfully";
 };
+export const sendinvitationToPatientservice = async (
+  doctorID,
+  patientemail,
+  url
+) => {
+  try {
+    const doctor = await Doctor.findById(doctorID);
+    const patient = await Patient.findOne({ email: patientemail }); // use findOne
 
+    if (!doctor || !patient || !patient.email) {
+      throw new Error("Doctor or Patient not found or invalid email");
+    }
+
+    const urlfinal = `${url}${doctorID}`;
+
+    await sendEmailadding(patient.email, undefined, urlfinal);
+
+    return "Invitation sent successfully";
+  } catch (error) {
+    console.error("Error sending invitation:", error);
+    throw new Error("Failed to send invitation");
+  }
+};

@@ -11,7 +11,7 @@ import { shareRapportWithDoctor } from "../controllers/reportController.js";
 
 const router = express.Router();
 
-router.patch("/:id/share", verifyToken, shareReport);
+// router.patch("/:id/share", verifyToken, shareReport);
 router.post("/share-email", verifyToken, shareByEmail);
 // router.get('/shared/:id', getSharedReport);
 // router.get('/shared-reports/:id', getSharedReport);

@@ -2,12 +2,15 @@ import express from "express";
 import {
   getReportsByUser,
   getReportById,
+  shareReport,
 } from "../controllers/archiveController.js";
 import verifyToken from "../Middleware/AuthVerify.js";
 import { getReportsAnalytics } from "../controllers/reportController.js";
 import Rapport from "../models/Rapport.js";
 
 const router = express.Router();
+router.put("/multi/:id", verifyToken, shareReport);
+
 router.get("/analytics/:patientId", verifyToken, getReportsAnalytics);
 
 router.get("/reports", verifyToken, getReportsByUser);

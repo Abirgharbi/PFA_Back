@@ -14,7 +14,7 @@ router.use("/ocr", ocrRoutes);
 router.use("/patients", patientRoutes);
 router.use("/doctors", doctorRoutes);
 router.use("/uploads", reportRoutes);
-router.use("/notifications",Notification); // assuming NotificationRoutes is defined
-router.use("/", report); // assuming report has base path '/'
+router.use("/notifications", Notification); // assuming NotificationRoutes is defined
+router.use("/", report);
 
 export default router;
