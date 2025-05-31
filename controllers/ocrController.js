@@ -10,13 +10,12 @@ export async function envoyerImageAuServiceOCR(imagePath) {
   form.append("file", fs.createReadStream(imagePath));
 
   // Appel de l'API Flask
-  const response = await axios.post("http://127.0.0.1:5000/api/analyze", form, {
+  const response = await axios.post("http://127.0.0.1:3000/api/analyze", form, {
     headers: form.getHeaders(),
   });
 
   return response.data;
 }
-
 
 // Utility to convert "DD/MM/YYYY" to Date object
 function convertDate(dateStr) {
