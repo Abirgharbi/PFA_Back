@@ -13,7 +13,6 @@ export async function envoyerImageAuServiceOCR(imagePath) {
   const response = await axios.post("http://127.0.0.1:3000/api/analyze", form, {
     headers: form.getHeaders(),
   });
-
   return response.data;
 }
 
@@ -32,10 +31,14 @@ export const uploadRapportWithOCR = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Aucun fichier envoyé." });
     }
-
     const imagePath = path.resolve(req.file.path);
     const ocrResult = await envoyerImageAuServiceOCR(imagePath);
-
+    if (!ocrResult || !ocrResult.tables) {
+      return res.status(400).json({
+        success: false,
+        message: "Le résultat OCR est invalide ou la date n'est pas trouvée.",
+      });
+    }
     const rapport = new Rapport({
       patientId: req.user.id,
       imageUrl: req.file.path.replace(/\\/g, "/"), // Ensure URL-safe slashes
