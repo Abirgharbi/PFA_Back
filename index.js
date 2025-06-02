@@ -12,8 +12,11 @@ const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
   "http://localhost:8080",
-  "http://192.168.1.17:8080","http://172.16.11.199:8080",
+  "http://192.168.1.17:8080",
+  "http://172.16.11.199:8080",
+  "http://192.168.1.117:8080",
   "capacitor://localhost",
+  "http://192.168.1.11:8080/",
 ];
 
 const corsOptions = {
