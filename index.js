@@ -1,6 +1,6 @@
 import express from "express";
-import routes from "./routes/index.js"; // Import all routes from index.js
-import dotenv from "dotenv"; // Import dotenv for environment variables
+import routes from "./routes/index.js";
+import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import { errorHandler } from "./Middleware/errorHandler.js";
@@ -15,8 +15,8 @@ const allowedOrigins = [
   "http://192.168.1.17:8080",
   "http://172.16.11.199:8080",
   "http://192.168.1.117:8080",
-  "capacitor://localhost",
-  "http://192.168.1.11:8080/",
+  "http://192.168.1.11:8080",
+  "capacitor://localhost", // Add any other specific origins you need
 ];
 
 const corsOptions = {
@@ -27,16 +27,14 @@ const corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true,
-  optionsSuccessStatus: 200,
+  credentials: true, // Allow credentials
 };
 
-app.use(cors({ origin: "*", credentials: true }));
+app.use(cors(corsOptions)); // Apply CORS middleware with options
 
 app.use(express.json());
 
 // Routes
-
 app.use("/uploads", express.static("uploads"));
 app.use("/api", routes);
 
