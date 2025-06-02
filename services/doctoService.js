@@ -1,5 +1,6 @@
 import Doctor from "../models/doctor.js";
 import Patient from "../models/patient.js";
+import Rapport from "../models/Rapport.js";
 import { sendEmailadding } from "../utils/SendEmail.js";
 export const createDoctor = async (data) => {
   const doctor = new Doctor(data);
@@ -49,8 +50,22 @@ export const unlinkDoctorAndPatient = async (doctorId, patientId) => {
   patient.doctors = patient.doctors.filter((id) => id.toString() !== doctorId);
   await patient.save();
 
+  // Remove doctorId and doctor's email from patient's rapports
+  const doctorEmail = doctor.email; // ensure email exists on the Doctor schema
+
+  await Rapport.updateMany(
+    { patient: patientId },
+    {
+      $pull: {
+        sharedWith: doctor._id,
+        sharedEmails: doctorEmail,
+      },
+    }
+  );
+
   return "Doctor and Patient unlinked successfully";
 };
+
 export const sendinvitationToPatientservice = async (
   doctorID,
   patientemail,
