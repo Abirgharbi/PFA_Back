@@ -19,7 +19,11 @@ export const getReportsAnalytics = async (req, res) => {
         .json({ message: "Accès non autorisé à ce patient" });
     }
     // Récupère les rapports de ce patient
-    const reports = await Rapport.find({ patientId });
+    // Récupère uniquement les rapports du patient partagés avec ce docteur
+    const reports = await Rapport.find({
+      patientId,
+      sharedWith: doctorId, // Mongoose comprend que sharedWith est un tableau
+    });
     const stats = getReportStatsDetailed(reports);
     res.json(stats);
   } catch (err) {
