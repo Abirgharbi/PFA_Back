@@ -54,11 +54,11 @@ export const unlinkDoctorAndPatient = async (doctorId, patientId) => {
   const doctorEmail = doctor.email; // ensure email exists on the Doctor schema
 
   await Rapport.updateMany(
-    { patient: patientId },
+    { patientId: patientId },
     {
       $pull: {
-        sharedWith: doctor._id,
-        sharedEmails: doctorEmail,
+        sharedWith: doctorId, // Remove doctorId from sharedWith array
+        sharedEmails: doctorEmail, // Remove doctorEmail from sharedEmails array
       },
     }
   );
