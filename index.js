@@ -15,7 +15,7 @@ const allowedOrigins = [
   "http://192.168.1.17:8080",
   "http://172.16.11.199:8080",
   "http://192.168.1.117:8080",
-  "http://172.20.10.3:8080/",
+  "http://172.20.10.3:8080",
   "http://192.168.1.11:8080",
   "capacitor://localhost", // Add any other specific origins you need
 ];
